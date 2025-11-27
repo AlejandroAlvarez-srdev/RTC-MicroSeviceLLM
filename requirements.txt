@@ -5,5 +5,6 @@ websockets
 numpy
 openai-whisper
 soundfile
+httpx
 
 pytest
