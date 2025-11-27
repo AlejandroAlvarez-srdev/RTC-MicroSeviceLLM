@@ -1,10 +1,9 @@
 fastapi
 uvicorn[standard]
 websockets
-
 numpy
 openai-whisper
 soundfile
 httpx
-
+click
 pytest
