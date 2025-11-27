@@ -2,3 +2,7 @@ fastapi
 uvicorn[standard]
 pytest
 httpx
+openai-whisper
+ffmpeg-python
+numpy
+soundfile
