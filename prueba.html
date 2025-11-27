@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>RTC Voice Streaming Test</title>
+  <style>
+    body { font-family: Arial; padding: 40px; }
+    button { padding: 10px 20px; margin-right: 10px; font-size: 16px; }
+    #log { margin-top: 20px; white-space: pre-wrap; background: #f3f3f3; padding: 20px; }
+  </style>
+</head>
+<body>
+
+<h1>Testeo de envio de chunks</h1>
+
+<button id="start">Begin</button>
+<button id="stop">Stop</button>
+
+<div id="log"></div>
+
+<script>
+let ws;
+let mediaRecorder;
+
+const log = (msg) => {
+  document.getElementById("log").textContent += msg + "\n";
+};
+
+document.getElementById("start").onclick = async () => {
+
+ 
+  ws = new WebSocket("ws://127.0.0.1:8000/voice-stream");
+
+  ws.onopen = () => log("🟢 WebSocket conectado");
+  ws.onmessage = (msg) => log("⬅️ Servidor: " + msg.data);
+  ws.onclose = () => log("🔴 WebSocket cerrado");
+
+  
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+
+  mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+
+  mediaRecorder.ondataavailable = async (event) => {
+    const blob = event.data;
+    const arrayBuffer = await blob.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
+
+    ws.send(bytes);
+    log("➡️ Chunk sended (" + bytes.length + " bytes)");
+  };
+
+  mediaRecorder.start(100);
+  log("🎙️ Listening...");
+};
+
+document.getElementById("stop").onclick = () => {
+  if (mediaRecorder) {
+    mediaRecorder.stop();
+    log("🛑 Recording Stop");
+  }
+  if (ws) {
+    ws.close();
+  }
+};
+</script>
+
+</body>
+</html>
