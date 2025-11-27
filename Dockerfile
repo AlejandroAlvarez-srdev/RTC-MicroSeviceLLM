@@ -20,9 +20,7 @@ RUN python -m pip install --upgrade pip && \
     pip install --no-cache-dir "torch==2.2.2+cpu" --index-url https://download.pytorch.org/whl/cpu && \
     pip install --no-cache-dir -r requirements.txt --no-deps
 
-# ⚠️ PRE-DESCARGAR EL MODELO WHISPER EN BUILD
-# Esto evita que, al arrancar en Fly, se quede 1 minuto descargando el modelo y reviente por timeout.
-RUN python -c "import whisper; whisper.load_model('base')"
+
 
 # Código de la app
 COPY app /app/app

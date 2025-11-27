@@ -10,7 +10,7 @@ import soundfile as sf
 router = APIRouter()
 
 # ⚠️ Whisper model (puedes cambiar a "small", "medium", etc)
-model = whisper.load_model("base")
+model = whisper.load_model("tiny")
 
 
 @router.websocket("/voice-stream")
