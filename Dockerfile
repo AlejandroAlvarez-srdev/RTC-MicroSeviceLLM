@@ -1,30 +1,29 @@
 FROM python:3.11-bookworm
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV PORT=8000
+ENV DEBIAN_FRONTEND=noninteractive
 
-WORKDIR /app
-
-# Dependencias del sistema
-RUN apt-get update && \
+RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
         ffmpeg \
         libsndfile1 \
-    && rm -rf /var/lib/apt/lists/*
+        ca-certificates || \
+    (apt-get update -y --fix-missing && \
+     apt-get install -y --no-install-recommends ffmpeg libsndfile1 ca-certificates) && \
+    rm -rf /var/lib/apt/lists/*
 
-# Dependencias Python
-COPY requirements.txt /app/
+WORKDIR /app
 
-RUN python -m pip install --upgrade pip && \
-    pip install --no-cache-dir "torch==2.2.2+cpu" --index-url https://download.pytorch.org/whl/cpu && \
-    pip install --no-cache-dir -r requirements.txt 
+COPY requirements.txt .
 
+# Instalar numpy primero
+RUN pip install --no-cache-dir numpy==1.26.4
 
-# Código de la app
-COPY app /app/app
-COPY tests /app/tests
+# Instalar lo demás
+RUN pip install --no-cache-dir -r requirements.txt
 
-EXPOSE 8000
+COPY app ./app
+COPY tests ./tests
 
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]
+ENV PORT=8080
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
